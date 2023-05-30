@@ -29,8 +29,12 @@ class WebManipulation:
             element = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, xpath))
             )
-            self.driver.execute_script("arguments[0].value = '" + str(text) + "';", element)
-            #driver.execute_script("var e = new KeyboardEvent('keydown', {'keyCode':13, 'which':13}); arguments[0].dispatchEvent(e);", element)
+            # Set the value
+            self.driver.execute_script("arguments[0].value = arguments[1];", element, text)
+            # Dispatch 'input' event
+            self.driver.execute_script("arguments[0].dispatchEvent(new Event('input'));", element)
+            # Dispatch 'change' event
+            self.driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", element)
         except TimeoutException:
             print(f"TimeoutException: The element with the xpath '{xpath}' was not found within 10 seconds.")
         except NoSuchElementException:
@@ -66,5 +70,32 @@ class WebManipulation:
         except Exception as e:
             print(f"Unexpected error occurred when trying to interact with the checkbox with the xpath '{xpath}': {str(e)}")
 
+    def get_elements_count(self, xpath: str) -> int:
+        try:
+            # Wait for up to 10 seconds before throwing a TimeoutException
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, xpath))
+            )
+
+            # Find all elements matching the given xpath
+            elements = self.driver.find_elements(By.XPATH, xpath)
+            # Return the count of these elements
+            return len(elements)
+        except TimeoutException:
+            print(f"TimeoutException: Elements with the xpath '{xpath}' were not found within 10 seconds.")
+            return 0
+        except NoSuchElementException:
+            print(f"NoSuchElementException: Elements with the xpath '{xpath}' do not exist on the page.")
+            return 0
+        except Exception as e:
+            print(f"Unexpected error occurred when trying to count the elements with the xpath '{xpath}': {str(e)}")
+            return 0
+
+    def scroll_to_bottom(self):
+        try:
+            # Execute the JavaScript to scroll to the bottom of the page
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        except Exception as e:
+            print(f"Unexpected error occurred when trying to scroll to the bottom of the page: {str(e)}")
 
 

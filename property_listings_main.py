@@ -1,4 +1,5 @@
 from selenium import webdriver
+import time
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,6 +13,7 @@ driver = webdriver.Chrome()
 
 # Open a webpage
 driver.get("https://www.otodom.pl/")
+driver.maximize_window()
 
 # Interact with elements on the webpage
 try:
@@ -26,9 +28,25 @@ except TimeoutException:
 # Create an instance of WebManipulation
 wm = WebManipulation(driver)
 
-# Set the value using JavaScript
+# Automation logic
 wm.click_element('//div[contains(text(), "Wybierz z listy lub wpisz miejscowość")]')
 wm.send_keys_to_element('//input[@id="location-picker-input"]', 'łódź')
-wm.click_element('(//span[contains(text(), "łódzkie")]/preceding-sibling::span[descendant::text()[contains(., "Łódź")]]/parent::span/parent::label/preceding-sibling::input)[1]')
+wm.click_element('(//span[contains(text(), "łódzkie")]/preceding-sibling::span[descendant::text()[contains(., "Łódź")]]/parent::span/parent::label/preceding-sibling::label)[1]')
+wm.click_element('//input[@id="priceMin"]')
+wm.send_keys_to_element('//input[@id="priceMin"]', '550000')
+wm.click_element('//input[@id="priceMax"]')
+wm.send_keys_to_element('//input[@id="priceMax"]', '650000')
+wm.click_element('//input[@id="areaMin"]')
+wm.send_keys_to_element('//input[@id="areaMin"]', '65')
+wm.click_element('//button[@id="search-form-submit"]')
+
+def get_all_listings():
+    time.sleep(1)
+    wm.scroll_to_bottom()
+    listings_count = wm.get_elements_count('//a[@data-cy="listing-item-link"]')
+    print(listings_count)
+    for i in range(listings_count):
+        print(i)
+get_all_listings()
 # Close the browser
 driver.quit()
