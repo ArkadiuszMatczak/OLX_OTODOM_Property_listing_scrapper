@@ -98,4 +98,19 @@ class WebManipulation:
         except Exception as e:
             print(f"Unexpected error occurred when trying to scroll to the bottom of the page: {str(e)}")
 
+    def get_element_text(self, xpath: str) ->str:
+        try:
+            # Wait for up to 10 seconds before throwing a TimeoutException
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, xpath))
+            )
+            return element.text
+        except TimeoutException:
+            print(f"TimeoutException: The element with the xpath '{xpath}' was not found within 10 seconds.")
+        except NoSuchElementException:
+            print(f"NoSuchElementException: The element with the xpath '{xpath}' does not exist on the page.")
+        except Exception as e:
+            print(f"Unexpected error occurred when trying to get the text of the element with the xpath '{xpath}': {str(e)}")
+
+
 
