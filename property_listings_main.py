@@ -6,10 +6,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from web_manipulation import WebManipulation
+from selenium.webdriver.chrome.options import Options
 
 
 # Create a new instance of the browser driver
-driver = webdriver.Chrome()
+chrome_options = Options()
+chrome_options.add_argument("--disable-notifications")
+chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+chrome_options.add_experimental_option('useAutomationExtension', False)
+driver = webdriver.Chrome(options=chrome_options)
 
 # Open a webpage
 driver.get("https://www.otodom.pl/")
@@ -41,20 +46,21 @@ wm.send_keys_to_element('//input[@id="areaMin"]', '65')
 wm.click_element('//button[@id="search-form-submit"]')
 
 def get_all_listings():
+    #get number of pages with listings
     pagecount = int(wm.get_element_text('//button[@aria-label="następna strona"]/preceding-sibling::button[1]'))
-    print(pagecount)
     for page_index in range(pagecount):
         if page_index != 0:
             time.sleep(1)
-            wm.scroll_to_bottom()
-            #dodac scroll do elementu zanim klikniesz
+            #wm.scroll_to_element(f'//button[contains(@aria-label, "Idź do strony") and contains(text(), "{(page_index+1)}")]')
             wm.click_element(f'//button[contains(@aria-label, "Idź do strony") and contains(text(), "{(page_index+1)}")]')
         time.sleep(1)
         wm.scroll_to_bottom()
-        listings_count = wm.get_elements_count('//a[@data-cy="listing-item-link"]')
-        print(listings_count)
+        listings_count = wm.get_elements_count('//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"]')
+        print(f'total listings count...............................{listings_count}')
         for i in range(listings_count):
-            print(i)
+            url_to_listing = wm.get_element_attribute(f'(//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"])[{i+1}]', 'href')
+            print(url_to_listing)
+        print(f'page...................................{page_index+1}')
 get_all_listings()
 # Close the browser
 driver.quit()

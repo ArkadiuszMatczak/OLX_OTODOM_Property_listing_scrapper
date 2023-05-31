@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 
 class WebManipulation:
     def __init__(self, driver):
@@ -15,7 +16,8 @@ class WebManipulation:
             element = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, xpath))
             )
-            element.click()
+            #element.click()
+            self.driver.execute_script("arguments[0].click();", element)
         except TimeoutException:
             print(f"TimeoutException: The element with the xpath '{xpath}' was not found within 10 seconds.")
         except NoSuchElementException:
@@ -111,6 +113,43 @@ class WebManipulation:
             print(f"NoSuchElementException: The element with the xpath '{xpath}' does not exist on the page.")
         except Exception as e:
             print(f"Unexpected error occurred when trying to get the text of the element with the xpath '{xpath}': {str(e)}")
+
+    def scroll_to_element(self, xpath: str):
+        try:
+            # Wait for up to 10 seconds before throwing a TimeoutException
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, xpath))
+            )
+            # Scroll to the element
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element).perform()
+        except TimeoutException:
+            print(f"TimeoutException: The element with the xpath '{xpath}' was not found within 10 seconds.")
+        except NoSuchElementException:
+            print(f"NoSuchElementException: The element with the xpath '{xpath}' does not exist on the page.")
+        except Exception as e:
+            print(f"Unexpected error occurred when trying to scroll to the element with the xpath '{xpath}': {str(e)}")
+
+    def get_element_attribute(self, xpath: str, attribute: str):
+        try:
+            # Wait for up to 10 seconds before throwing a TimeoutException
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, xpath))
+            )
+            # Get the attribute value
+            attribute_value = element.get_attribute(attribute)
+            return attribute_value
+        except TimeoutException:
+            print(f"TimeoutException: The element with the xpath '{xpath}' was not found within 10 seconds.")
+            return None
+        except NoSuchElementException:
+            print(f"NoSuchElementException: The element with the xpath '{xpath}' does not exist on the page.")
+            return None
+        except Exception as e:
+            print(f"Unexpected error occurred when trying to get '{attribute}' attribute of the element with the xpath '{xpath}': {str(e)}")
+            return None
+
+
 
 
 

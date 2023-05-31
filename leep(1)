@@ -1,0 +1,23 @@
+[33mcommit 5216bb03344bf7f190342c7154f3f081f771336b[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Arkadiusz Matczak <a.j.matczak@gmail.com>
+Date:   Wed May 31 16:50:00 2023 +0200
+
+    dodana pentla strony
+
+[33mcommit 99f6ebcac5b0b502cf3f4a60d1da8b63bd5c4350[m
+Author: Arkadiusz Matczak <a.j.matczak@gmail.com>
+Date:   Wed May 31 00:17:48 2023 +0200
+
+    dodanie filtrowania oraz zebranie liczby wszystkich ogloszen na stronie TO DO: dodanie zapisywania danych w postaci SETu, porownanie setow, roznica zapisywana jako CSV, dodanie petli przechodzacej przez wszystkie strony z ogloszeniami
+
+[33mcommit baf5716897cf3caf46039da4b72526f60386f09d[m
+Author: Arkadiusz Matczak <a.j.matczak@gmail.com>
+Date:   Tue May 30 00:20:56 2023 +0200
+
+    proba klikniecie checkboxu
+
+[33mcommit 753a6798f5b7f754dd4d45102d7b6e13ff298fd3[m
+Author: Arkadiusz Matczak <a.j.matczak@gmail.com>
+Date:   Mon May 29 00:34:52 2023 +0200
+
+    intial commit
