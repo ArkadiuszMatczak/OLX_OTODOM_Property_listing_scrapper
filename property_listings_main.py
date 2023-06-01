@@ -1,3 +1,4 @@
+import pickle
 from selenium import webdriver
 import time
 from selenium.webdriver.common.keys import Keys
@@ -8,6 +9,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from web_manipulation import WebManipulation
 from selenium.webdriver.chrome.options import Options
 
+is_first_run = True
 
 # Create a new instance of the browser driver
 chrome_options = Options()
@@ -45,7 +47,8 @@ wm.click_element('//input[@id="areaMin"]')
 wm.send_keys_to_element('//input[@id="areaMin"]', '65')
 wm.click_element('//button[@id="search-form-submit"]')
 
-def get_all_listings():
+def get_new_listings(path):
+    data_set = set()
     #get number of pages with listings
     pagecount = int(wm.get_element_text('//button[@aria-label="następna strona"]/preceding-sibling::button[1]'))
     for page_index in range(pagecount):
@@ -59,8 +62,19 @@ def get_all_listings():
         print(f'total listings count...............................{listings_count}')
         for i in range(listings_count):
             url_to_listing = wm.get_element_attribute(f'(//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"])[{i+1}]', 'href')
-            print(url_to_listing)
+            data_set.add(url_to_listing)
+        print(data_set)
         print(f'page...................................{page_index+1}')
-get_all_listings()
+
+    if is_first_run:
+        with open(path, 'wb') as f:
+            pickle.dump(data_set, f)
+    else:
+        with open(path, 'rb') as f:
+            compare_data = pickle.load(f)
+            new_data = data_set.difference(compare_data)
+            print(new_data)
+
+get_new_listings("C:/Users/lenovo/Property listings/compareData.pkl")
 # Close the browser
 driver.quit()
