@@ -9,7 +9,8 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from web_manipulation import WebManipulation
 from selenium.webdriver.chrome.options import Options
 
-is_first_run = True
+
+is_first_run = False
 
 # Create a new instance of the browser driver
 chrome_options = Options()
@@ -22,7 +23,7 @@ driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://www.otodom.pl/")
 driver.maximize_window()
 
-# Interact with elements on the webpage
+# Accept cookies popup
 try:
     # Wait for up to 10 seconds before throwing a TimeoutException, Cookies pop up
     element_popup = WebDriverWait(driver, 10).until(
@@ -36,20 +37,26 @@ except TimeoutException:
 wm = WebManipulation(driver)
 
 # Automation logic
+# input łódź as a city
 wm.click_element('//div[contains(text(), "Wybierz z listy lub wpisz miejscowość")]')
 wm.send_keys_to_element('//input[@id="location-picker-input"]', 'łódź')
+# select łódź checkbox
 wm.click_element('(//span[contains(text(), "łódzkie")]/preceding-sibling::span[descendant::text()[contains(., "Łódź")]]/parent::span/parent::label/preceding-sibling::label)[1]')
+# input minimum price
 wm.click_element('//input[@id="priceMin"]')
 wm.send_keys_to_element('//input[@id="priceMin"]', '550000')
+# input maximum price
 wm.click_element('//input[@id="priceMax"]')
 wm.send_keys_to_element('//input[@id="priceMax"]', '650000')
+# input minimum area
 wm.click_element('//input[@id="areaMin"]')
 wm.send_keys_to_element('//input[@id="areaMin"]', '65')
+# click search
 wm.click_element('//button[@id="search-form-submit"]')
 
 def get_new_listings(path):
     data_set = set()
-    #get number of pages with listings
+    # get number of pages with listings
     pagecount = int(wm.get_element_text('//button[@aria-label="następna strona"]/preceding-sibling::button[1]'))
     for page_index in range(pagecount):
         if page_index != 0:
@@ -57,14 +64,13 @@ def get_new_listings(path):
             #wm.scroll_to_element(f'//button[contains(@aria-label, "Idź do strony") and contains(text(), "{(page_index+1)}")]')
             wm.click_element(f'//button[contains(@aria-label, "Idź do strony") and contains(text(), "{(page_index+1)}")]')
         time.sleep(1)
+        # scroll to bottom in order to load all listings
         wm.scroll_to_bottom()
         listings_count = wm.get_elements_count('//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"]')
-        print(f'total listings count...............................{listings_count}')
         for i in range(listings_count):
             url_to_listing = wm.get_element_attribute(f'(//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"])[{i+1}]', 'href')
             data_set.add(url_to_listing)
-        print(data_set)
-        print(f'page...................................{page_index+1}')
+
 
     if is_first_run:
         with open(path, 'wb') as f:
@@ -74,7 +80,10 @@ def get_new_listings(path):
             compare_data = pickle.load(f)
             new_data = data_set.difference(compare_data)
             print(new_data)
+        with open(path, 'wb') as f:
+            pickle.dump(data_set, f)
 
+# interate throw all listings on each page and extract only new listings
 get_new_listings("C:/Users/lenovo/Property listings/compareData.pkl")
 # Close the browser
 driver.quit()
