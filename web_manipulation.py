@@ -5,10 +5,33 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
+import time
+import pickle
 
-class WebManipulation:
+class SeleniumDriver:
     def __init__(self, driver):
         self.driver = driver
+
+
+class WebManipulation(SeleniumDriver):
+
+    def __init__(self, driver):
+        super().__init__(driver)
+
+    def launch(self, url: str):
+        self.driver.get(url)
+        self.driver.maximize_window()
+
+    def accept_cookies(self, xpath: str):
+        try:
+            # Wait for up to 10 seconds before throwing a TimeoutException, Cookies pop up
+            element_popup = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, xpath))
+            )
+            element_popup.click()
+        except TimeoutException:
+            pass
+
 
     def click_element(self, xpath: str):
         try:
@@ -148,6 +171,45 @@ class WebManipulation:
         except Exception as e:
             print(f"Unexpected error occurred when trying to get '{attribute}' attribute of the element with the xpath '{xpath}': {str(e)}")
             return None
+
+class GetNewListings(SeleniumDriver):
+    is_first_run = False
+
+    def __init__(self, driver):
+        super().__init__(driver)
+
+
+    def get_new_listings_Otodom(self, path):
+
+        wm = WebManipulation(self.driver)
+        data_set = set()
+        # get number of pages with listings
+        pagecount = int(wm.get_element_text('//button[@aria-label="następna strona"]/preceding-sibling::button[1]'))
+        for page_index in range(pagecount):
+            if page_index != 0:
+                time.sleep(1)
+                #wm.scroll_to_element(f'//button[contains(@aria-label, "Idź do strony") and contains(text(), "{(page_index+1)}")]')
+                wm.click_element(f'//button[contains(@aria-label, "Idź do strony") and contains(text(), "{(page_index+1)}")]')
+            time.sleep(1)
+            # scroll to bottom in order to load all listings
+            wm.scroll_to_bottom()
+            listings_count = wm.get_elements_count('//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"]')
+            for i in range(listings_count):
+                url_to_listing = wm.get_element_attribute(f'(//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"])[{i+1}]', 'href')
+                data_set.add(url_to_listing)
+
+
+        if self.is_first_run:
+            with open(path, 'wb') as f:
+                pickle.dump(data_set, f)
+        else:
+            with open(path, 'rb') as f:
+                compare_data = pickle.load(f)
+                new_data = data_set.difference(compare_data)
+                print(new_data)
+            with open(path, 'wb') as f:
+                pickle.dump(data_set, f)
+
 
 
 
