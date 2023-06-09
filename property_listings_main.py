@@ -47,11 +47,40 @@ wm.send_keys_to_element('//input[@id="areaMin"]', '65')
 wm.click_element('//button[@id="search-form-submit"]')
 # interate throw all listings on each page and extract only new listings
 gnl = GetNewListings(driver)
-gnl.get_new_listings_Otodom("C:/Users/lenovo/Property listings/compareData.pkl")
+# xpaths requiered for data extraction
+otodom_path = "C:/Users/lenovo/Property listings/compareData.pkl"
+otodom_page_count = '//button[@aria-label="następna strona"]/preceding-sibling::button[1]'
+otodom_next_page = '//button[@aria-label="następna strona"]'
+otodom_listing_link = '//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"]'
+#
+gnl.get_new_listings(otodom_path, otodom_page_count, otodom_next_page, otodom_listing_link)
 
 wm.launch('https://www.olx.pl/')
 wm.accept_cookies('//button[@id="onetrust-accept-btn-handler"]')
 wm.click_element('//a/span[contains(text(), "Nieruchomości")]/following-sibling::span')
 wm.click_element('//span[contains(text(), "Mieszkania")]')
+
+wm.write_into_element_with_actionchains('//input[@data-testid="location-search-input"]', 'łódź')
+
+wm.click_element('(//input[@data-testid="range-to-input"])[1]')
+wm.write_into_element_with_actionchains('(//input[@data-testid="range-to-input"])[1]', '650000')
+
+wm.click_element('(//input[@data-testid="range-from-input"])[1]')
+wm.write_into_element_with_actionchains('(//input[@data-testid="range-from-input"])[1]', '500000')
+
+wm.click_element('(//input[@data-testid="range-from-input"])[2]')
+wm.write_into_element_with_actionchains('(//input[@data-testid="range-from-input"])[2]', '65')
+
+wm.click_element('//button[@data-testid="search-submit"]')
+
+gnl = GetNewListings(driver)
+# xpaths requiered for data extraction
+olx_path = "C:/Users/lenovo/Property listings/compareData1.pkl"
+olx_page_count = '//a[@data-testid="pagination-forward"]/preceding-sibling::li[1]'
+olx_next_page = '//a[@data-testid="pagination-forward"]'
+olx_listing_link = '//div[@data-cy="l-card"]/a'
+#
+gnl.get_new_listings(olx_path, olx_page_count, olx_next_page, olx_listing_link)
+
 # Close the connection
 driver.quit()

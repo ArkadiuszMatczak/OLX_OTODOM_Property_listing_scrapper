@@ -48,6 +48,32 @@ class WebManipulation(SeleniumDriver):
         except Exception as e:
             print(f"Unexpected error occurred when trying to click the element with the xpath '{xpath}': {str(e)}")
 
+
+
+    def write_into_element_with_actionchains(self, xpath: str, text: str):
+        try:
+            # Wait for up to 10 seconds before throwing a TimeoutException
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, xpath))
+            )
+            actions = ActionChains(self.driver)
+            actions.move_to_element(element).click()
+            for char in text:
+                actions.send_keys(char)
+                time.sleep(1.5)  # adjust the sleep time as needed
+            actions.perform()
+            # Dispatch 'input' event
+            self.driver.execute_script("arguments[0].dispatchEvent(new Event('input'));", element)
+            # Dispatch 'change' event
+            self.driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", element)
+        except TimeoutException:
+            print(f"TimeoutException: The element with the xpath '{xpath}' was not found within 10 seconds.")
+        except NoSuchElementException:
+            print(f"NoSuchElementException: The element with the xpath '{xpath}' does not exist on the page.")
+        except Exception as e:
+            print(f"Unexpected error occurred when trying to write into the element with the xpath '{xpath}': {str(e)}")
+
+
     def write_into_element(self, xpath: str, text: str):
         try:
             # Wait for up to 10 seconds before throwing a TimeoutException
@@ -179,23 +205,33 @@ class GetNewListings(SeleniumDriver):
         super().__init__(driver)
 
 
-    def get_new_listings_Otodom(self, path):
+    def get_new_listings(self, path: str, page_last_number_btn: str, next_page_btn: str, listing_link: str) -> None:
+        """
+        This function reads all listings, creates and compares a new set with unique listings
+        :parameter
+            page_last_number_btn (str): xpath to last page button, text of this element indicate how many pages of listings
+                                        are on the page
+            next_page_btn (str): xpath to button with a next page
+            listing_link (str): xpath to element where href can be extracted
+        :returns
+            None
+        """
 
         wm = WebManipulation(self.driver)
         data_set = set()
         # get number of pages with listings
-        pagecount = int(wm.get_element_text('//button[@aria-label="następna strona"]/preceding-sibling::button[1]'))
+        pagecount = int(wm.get_element_text(page_last_number_btn))
         for page_index in range(pagecount):
             if page_index != 0:
                 time.sleep(1)
                 #wm.scroll_to_element(f'//button[contains(@aria-label, "Idź do strony") and contains(text(), "{(page_index+1)}")]')
-                wm.click_element(f'//button[contains(@aria-label, "Idź do strony") and contains(text(), "{(page_index+1)}")]')
+                wm.click_element(next_page_btn)
             time.sleep(1)
             # scroll to bottom in order to load all listings
             wm.scroll_to_bottom()
-            listings_count = wm.get_elements_count('//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"]')
+            listings_count = wm.get_elements_count(listing_link)
             for i in range(listings_count):
-                url_to_listing = wm.get_element_attribute(f'(//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"])[{i+1}]', 'href')
+                url_to_listing = wm.get_element_attribute(f'({listing_link})[{i+1}]', 'href')
                 data_set.add(url_to_listing)
 
 
