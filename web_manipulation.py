@@ -205,7 +205,7 @@ class GetNewListings(SeleniumDriver):
         super().__init__(driver)
 
 
-    def get_new_listings(self, path: str, page_last_number_btn: str, next_page_btn: str, listing_link: str) -> None:
+    def get_new_listings(self, path: str, page_last_number_btn: str, next_page_btn: str, listing_link: str) -> set:
         """
         This function reads all listings, creates and compares a new set with unique listings
         :parameter
@@ -214,7 +214,7 @@ class GetNewListings(SeleniumDriver):
             next_page_btn (str): xpath to button with a next page
             listing_link (str): xpath to element where href can be extracted
         :returns
-            None
+            set_listings (set): contains unique listings in comparession to the last search
         """
 
         wm = WebManipulation(self.driver)
@@ -234,17 +234,24 @@ class GetNewListings(SeleniumDriver):
                 url_to_listing = wm.get_element_attribute(f'({listing_link})[{i+1}]', 'href')
                 data_set.add(url_to_listing)
 
-
-        if self.is_first_run:
-            with open(path, 'wb') as f:
-                pickle.dump(data_set, f)
-        else:
+        try:
             with open(path, 'rb') as f:
                 compare_data = pickle.load(f)
                 new_data = data_set.difference(compare_data)
+                print(f'not first run {path}')
                 print(new_data)
             with open(path, 'wb') as f:
                 pickle.dump(data_set, f)
+                return new_data
+
+        except:
+            with open(path, 'wb') as f:
+                pickle.dump(data_set, f)
+                print(f'first run {path}')
+                print(data_set)
+                return data_set
+
+
 
 
 
