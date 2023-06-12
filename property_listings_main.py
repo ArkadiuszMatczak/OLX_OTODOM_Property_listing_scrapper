@@ -1,11 +1,4 @@
-
 from selenium import webdriver
-
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from web_manipulation import WebManipulation, GetNewListings
 from selenium.webdriver.chrome.options import Options
 
@@ -54,9 +47,10 @@ otodom_path = "C:/Users/lenovo/Property listings/compareData.pkl"
 otodom_page_count = '//button[@aria-label="następna strona"]/preceding-sibling::button[1]'
 otodom_next_page = '//button[@aria-label="następna strona"]'
 otodom_listing_link = '//ul/li[@data-cy="listing-item"]/a[@data-cy="listing-item-link"]'
-#
+#get all listings as a set
 set_otodom = gnl.get_new_listings(otodom_path, otodom_page_count, otodom_next_page, otodom_listing_link)
 
+#OLX
 wm.launch('https://www.olx.pl/')
 wm.accept_cookies('//button[@id="onetrust-accept-btn-handler"]')
 wm.click_element('//a/span[contains(text(), "Nieruchomości")]/following-sibling::span')
