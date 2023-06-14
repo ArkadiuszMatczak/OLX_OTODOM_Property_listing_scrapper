@@ -238,8 +238,8 @@ class GetNewListings(SeleniumDriver):
             with open(path, 'rb') as f:
                 compare_data = pickle.load(f)
                 new_data = data_set.difference(compare_data)
-                print(f'not first run {path}')
-                print(new_data)
+                #print(f'not first run {path}')
+                #print(new_data)
             with open(path, 'wb') as f:
                 pickle.dump(data_set, f)
                 return new_data
@@ -247,8 +247,8 @@ class GetNewListings(SeleniumDriver):
         except:
             with open(path, 'wb') as f:
                 pickle.dump(data_set, f)
-                print(f'first run {path}')
-                print(data_set)
+                #print(f'first run {path}')
+                #print(data_set)
                 return data_set
 
 
