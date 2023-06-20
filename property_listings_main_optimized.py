@@ -4,9 +4,8 @@ from web_manipulation import WebManipulation, GetNewListings
 
 
 class WebsiteAutomation:
-    def __init__(self, url, city, cookies_Xpath, search_elements, listings_elements):
+    def __init__(self, url, cookies_Xpath, search_elements, listings_elements):
         self.url = url
-        self.city = city
         self.cookies_Xpath = cookies_Xpath
         self.search_elements = search_elements
         self.listings_elements = listings_elements
@@ -21,15 +20,14 @@ class WebsiteAutomation:
 
 
 class Otodom(WebsiteAutomation):
-    def __init__(self, url, city, region, cookies_Xpath, search_elements, listings_elements):
-        super().__init__(url, city, cookies_Xpath, search_elements, listings_elements)
-        self.region = region
+    def __init__(self, url, cookies_Xpath, search_elements, listings_elements):
+        super().__init__(url, cookies_Xpath, search_elements, listings_elements)
 
-    def search_website(self, wm, price_range, min_area):
+    def search_website(self, wm, price_range, min_area, city):
         wm.launch(self.url)
         wm.accept_cookies(self.cookies_Xpath)
         wm.click_element(self.search_elements['location_path'])
-        wm.send_keys_to_element(self.search_elements['location_input'], self.city)
+        wm.send_keys_to_element(self.search_elements['location_input'], city)
         # select łódź checkbox
         # wm.click_element(f'(//span[contains(text(), "{self.region}")]/preceding-sibling::span[descendant::text()[contains(., "{self.city}")]]/parent::span/parent::label/preceding-sibling::label)[1]')
         wm.click_element('//div[@data-cy="search.form.location.dropdown.list-wrapper"]//li[1]/label[1]')
@@ -43,20 +41,20 @@ class Otodom(WebsiteAutomation):
 
 
 class Olx(WebsiteAutomation):
-    def __init__(self, url, city, cookies_Xpath, property_Xpath, apartments_Xpath, search_elements, listings_elements):
-        super().__init__(url, city, cookies_Xpath, search_elements, listings_elements)
+    def __init__(self, url, cookies_Xpath, property_Xpath, apartments_Xpath, search_elements, listings_elements):
+        super().__init__(url, cookies_Xpath, search_elements, listings_elements)
         self.property_Xpath = property_Xpath
         self.apartments_Xpath = apartments_Xpath
 
-    def search_website(self, wm, price_range, min_area):
+    def search_website(self, wm, price_range, min_area, city):
         wm.launch(self.url)
         wm.accept_cookies(self.cookies_Xpath)
         wm.click_element(self.property_Xpath)
         wm.click_element(self.apartments_Xpath)
-        wm.write_into_element_with_actionchains(self.search_elements['location_input'], self.city)
+        wm.write_into_element_with_actionchains(self.search_elements['location_input'], city)
         #(//li[@data-testid="suggestion-item" and descendant::text()[contains(., 'Łódź')]])[1]
         wm.click_element(self.search_elements['location_input'])
-        wm.click_element(f'(//li[@data-testid="suggestion-item" and descendant::text()[contains(., {self.city})]])[1]')
+        wm.click_element(f'(//li[@data-testid="suggestion-item" and descendant::text()[contains(., {city})]])[1]')
         wm.click_element(self.search_elements['min_price_path'])
         wm.write_into_element_with_actionchains(self.search_elements['min_price_path'], price_range[0])
         wm.click_element(self.search_elements['max_price_path'])
@@ -82,8 +80,6 @@ def main():
     websites = [
         Otodom(
             url="https://www.otodom.pl/",
-            city='Łódź',
-            region='łódzkie',
             cookies_Xpath='//button[@id="onetrust-accept-btn-handler"]',
             search_elements={
                             'location_path': '//div[contains(text(), "Wybierz z listy lub wpisz miejscowość")]',
@@ -102,7 +98,6 @@ def main():
         ),
         Olx(
             url='https://www.olx.pl/',
-            city='Łódź',
             cookies_Xpath='//button[@id="onetrust-accept-btn-handler"]',
             property_Xpath='//a/span[contains(text(), "Nieruchomości")]/following-sibling::span',
             apartments_Xpath='//span[contains(text(), "Mieszkania")]',
@@ -122,13 +117,13 @@ def main():
         )
         # You can add more websites here in the same format
     ]
-
+    city = "Łódź"
     price_range = ('580000', '620000')
     min_area = '65'
     listings = set()
 
     for website in websites:
-        website.search_website(wm, price_range, min_area)
+        website.search_website(wm, price_range, min_area, city)
         listings |= website.extract_listings(gnl)
 
     print("Main listing set")
