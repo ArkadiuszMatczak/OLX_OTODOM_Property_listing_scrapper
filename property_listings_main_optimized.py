@@ -117,6 +117,7 @@ def main():
         )
         # You can add more websites here in the same format
     ]
+    # Search parameters
     city = "Łódź"
     price_range = ('580000', '620000')
     min_area = '65'
